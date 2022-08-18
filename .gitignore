@@ -1,0 +1,13 @@
+# log files
+*.log
+wandb/
+
+# all data
+data/
+
+# other
+.ipynb_checkpoints
+__pycache__
+.pytest_cache
+*.egg-info/
+.DS_Store

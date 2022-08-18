@@ -1,0 +1,15 @@
+# data handling and visualization
+pandas
+numpy
+sklearn
+matplotlib
+
+# modelling
+interpret
+tensorflow
+torch
+lassonet
+gaminet
+
+# experiment tracking (optional)
+wandb
