@@ -7,7 +7,8 @@ This is the repo includes the project code for the master seminar interpretable 
 
 
 ## Installation
-`pip install -r requirements.txt`
+`pip install -r requirements.txt` 
+
 `pip install .`
 
 ## Usage
