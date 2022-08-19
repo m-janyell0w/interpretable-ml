@@ -50,7 +50,7 @@ def fit_model(trainloader, testloader, n_features, model, optimizer, device, max
     
     for epoch in range(max_epoch):
         if (epoch)%5==0:
-            print(f"##### Training Epoch Nr: {epoch} started ####")
+            print(f"##### Training Epoch Nr: {epoch+1} started ####")
             #print("Early stopping counter: ", early_stopping.counter)
         f_out_tr = []                 # train feature outputs
         total_batch_loss=0
@@ -132,8 +132,9 @@ def fit_model(trainloader, testloader, n_features, model, optimizer, device, max
     
     # show duration of training
     time_spent = round((time.time()-start)/60, 2)
-    print(f"#################### Finished training in {time_spent} minutes ####################"
-        time_spent)
+    print(f"#################### Finished training in {time_spent} minutes ####################")
+    
+    wandb.finish()
     
     if MSE == False:
         return [100*(test_correct/test_total), test_loss, np.vstack(np.array(f_out_tr)), 

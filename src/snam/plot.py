@@ -2,21 +2,20 @@
 import matplotlib.pyplot as plt
 
 
-def plot_shape_functions(X_train, n_features, f_out_tr, nrows=2, ncols=4, save=False, run_id='00'):
+def plot_shape_functions(columns, f_out_tr, nrows=2, ncols=4, save=False, run_id='00'):
     """
     Plots learned shape functions where the amount of plots depends the nrows and ncols
     """
     
-    columns = X_train.columns
-    features = n_features
-
+    #columns = X_train.columns
     f_tr = f_out_tr
-    
-    plt.title('Shape functions for each feature learned by SNAM subnetworks')
     
     w = ncols*4
     h = nrows*4.5
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(w, h))
+    
+    # title
+    fig.title('Shape functions for each feature learned by SNAM subnetworks')
     
     i = 0
     for row in axes:
@@ -71,3 +70,16 @@ def plot_shape_functions_xu(f_out_tr, save=False, run_id=""):
     if save:
         fig.savefig(path+'shape_functions_snam_'+str(run_id)+'.png', bbox_inches='tight')
     plt.show() 
+    
+def plt_loss_curve(train_loss_history, test_loss_history, run_id):
+    """
+    Plots the mse loss curve on training and validation set.
+    """
+    
+    plt.title('Training performance measured by MSE')
+    plt.plot(train_loss_history[1:], c='b', label='train_loss')
+    plt.plot(test_loss_history[1:], c='r', label='val_loss')
+    plt.legend()
+    if save:
+        plt.savefig(f'train_history_{run_id}.png')
+    plt.show()
