@@ -25,7 +25,7 @@ class EbmPipeline():
         self.end_of_training: str = "1985-12-31",
         self.end_of_validation: str ="1990-12-31" 
         self.tune: bool = False, 
-        self.feature_selection: list = [],
+        self.feature_selection: list = None,
         self.param_dict: dict = {}
         self.model = ExplainableBoostingRegressor(random_state=0)
     
@@ -56,68 +56,78 @@ class EbmPipeline():
         start_time = datetime.now()
 
         # load and split data
-        self.data = data_loader(root_path, data_dir, pickle, feature_selection)
-        self.data = normalize_target(data)
+        self.data = data_loader(self.root_path, self.data_dir, self.pickle, self.feature_selection)
+        self.data = normalize_target(self.data)
         self.X_train, self.X_valid, self.X_test, self.y_train, self.y_valid, self.y_test = \
         time_series_splitter(self.data, self.start_of_training, self.end_of_training, self.end_of_validation)
 
         # train model
-        self.model = train_model(model, X_train, y_train, tune, param_dict)
+        self.model = train_model(self.model, self.X_train, self.y_train, self.tune, self.param_dict)
 
         # give global model explanations using built-in viz
-        visualize_ebm_global(fitted_model)
+        visualize_ebm_global(self.model)
 
         # get interesting metrics and attributes
         self.model_params = fitted_model.get_params()
-        self.is_r_squared = validate_model(model, X_train, y_train)
-        self.oos_r_squared = validate_model(model, X_valid, y_valid)
-        self.rmse_test = rmse(y_valid,y_pred)
-        self.mse_test = mean_squared_error(y_valid, y_pred)
-        self.mae_test = mean_absolute_error(y_valid,y_pred)
+        self.is_r_squared = validate_model(self.model, self.X_train, self.y_train)
+        self.oos_r_squared = validate_model(self.model, self.X_valid, self.y_valid)
+        self.rmse_test = rmse(self.y_valid, self.y_pred)
+        self.mse_test = mean_squared_error(self.y_valid, self.y_pred)
+        self.mae_test = mean_absolute_error(self.y_valid, self.y_pred)
 
-        self.y_pred = fitted_model.predict(X_valid)
-        self.n_features = X_train.shape[1]
+        self.y_pred = self.model.predict(self.X_valid)
+        self.n_features = self.X_train.shape[1]
         self.execution_time = round((datetime.now() - start_time).total_seconds(),2)
 
         # log metrics
-        wandb.log({"mse" : mse, "rmse" : rmse_test, "mae" : mae, "n_features": n_features, 
-                   "time_spent" : execution_time, "Model Params" : params})
+        wandb.log({"mse" : self.mse, "rmse" : self.rmse_test, "mae" : self.mae, 
+                   "n_features": self.n_features,
+                   "time_spent" : self.execution_time, "Model Params" : self.params})
         wandb.finish()
 
         #return execution_time, is_score, oos_score, rmse_test, mse_test, mae_test,
         #        params, X_valid, y_valid, y_pred, fitted_model
 
         
-        def train_model(self):
-            """
-            Train model on possibly given hyperparameters.
-            """
+    def train_model(self, X_train, y_train):
+        """
+        Train model on possibly given hyperparameters.
+        """
 
-            if self.tune:
-                print("model is being tuned")
-                self.model.set_params(**self.param_dict)
-            self.model.fit(self.X_train, self.y_train)
-            #return self.model
-        
-        def validate_model(self):
-            """
-            Returns R-squared of given model on the specified data set.
-            """
-            self.model.score(self.X_valid, self.y_valid) # validation set R²
+        if self.tune:
+            print("model is being tuned")
+            self.model.set_params(**self.param_dict)
+        self.model.fit(self.X_train, self.y_train)
+        #return self.model
 
-        def rmse(self):
-            """
-            Returns RMSE for ground truth and prediction vectors.
-            """
-            self.rmse_test = np.sqrt(((self.y_test - self.y_pred)**2).mean())  
-            # np.sqrt(((predictions - targets) ** 2).mean())
+    def validate_model(self):
+        """
+        Returns R-squared of given model on the specified data set.
+        """
+        self.model.score(self.X_valid, self.y_valid) # validation set R²
 
-        def visualize_ebm_global(self):
-            """
-            Visualize global explanation of given model
-            """
-            ebm_global = self.model.explain_global()
-            show(ebm_global) 
+    def rmse(self):
+        """
+        Returns RMSE for ground truth and prediction vectors.
+        """
+        self.rmse_test = np.sqrt(((self.y_test - self.y_pred)**2).mean())  
+        # np.sqrt(((predictions - targets) ** 2).mean())
+
+    def visualize_ebm_global(self):
+        """
+        Visualize global explanation of given model
+        """
+        ebm_global = self.model.explain_global()
+        show(ebm_global)
+
+    def normalize_target(self):
+        """
+        Normalizes target variable y of a dataset.
+        """
+        scaler = StandardScaler()
+        target = self.data.TARGET.values.reshape(-1, 1)
+        #print(target.shape)
+        self.data['TARGET'] = scaler.fit_transform(target)
 
             
 def save_model(model, model_dir='./models/ebm/', run_id='00'):
