@@ -56,4 +56,4 @@ def importance_bar_chart(feature_importance_df, model_dir='./models/ebm/' , save
     plt.show()
     
     if save:
-        plt.savefig(f'{model_dir}ebm_importances_{id}.png')
+        fig.savefig(f'{model_dir}ebm_importances_{id}.png')

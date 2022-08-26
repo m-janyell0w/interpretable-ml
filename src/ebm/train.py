@@ -114,21 +114,6 @@ class EbmPipeline():
             self.model.set_params(**self.param_dict)
         self.model = self.model.fit(X_train, y_train)
         #return self.model
-
-    def validate_model(self, X_valid, y_valid):
-        """
-        Returns R-squared of given model on the specified data set.
-        """
-        r_squared = self.model.score(X_valid, y_valid) # validation set R²
-        return r_squared
-        
-    def rmse(self, y_test, y_pred):
-        """
-        Returns RMSE for ground truth and prediction vectors.
-        """
-        rmse_test = np.sqrt(((self.y_test - self.y_pred)**2).mean())  
-        # np.sqrt(((predictions - targets) ** 2).mean())
-        return rmse_test
         
     def visualize_ebm_global(self):
         """
@@ -137,6 +122,23 @@ class EbmPipeline():
         ebm_global = self.model.explain_global()
         show(ebm_global)
         return ebm_global
+
+
+def validate_model(model, X_valid, y_valid):
+    """
+    Returns R-squared of given model on the specified data set.
+    """
+    r_squared = model.score(X_valid, y_valid) # validation set R²
+    return r_squared
+        
+def rmse(y, y_pred):
+    """
+    Returns RMSE for ground truth and prediction vectors.
+    """
+    rmse = np.sqrt(((y - y_pred)**2).mean())  
+    # np.sqrt(((predictions - targets) ** 2).mean())
+    return rmse
+
 
 def normalize_target(data):
     """
@@ -193,3 +195,29 @@ def denormalize(data, scaler_path, dataframe=True):
         data_denorm = pd.DataFrame(columns=data.columns)
     
     return data_denorm
+
+def evaluate_model(model, X, y, set_type="train"):
+    # pred
+    y_pred = model.predict(X)
+
+    # performance metrics
+    r_squared = model.score(X,y)
+    mae = mean_absolute_error(y, y_pred) 
+    mse = mean_squared_error(y, y_pred)
+    rmse_ = rmse(y, y_pred)
+    
+    # print metrics
+    print(f"------------- {set_type} performance: -------------")
+    print(f"R-squared: {r_squared}")
+    print(f"Mean absolute error: {mae}")
+    print(f"Mean squared error: {mse}")
+    print(f"Root mean squared error: {rmse_} \n")
+
+    metrics = {
+        "r-squared" : r_squared,
+        "mae" : mae,
+        "mse" : mse,
+        "rmse" : rmse_
+    }
+
+    return metrics
