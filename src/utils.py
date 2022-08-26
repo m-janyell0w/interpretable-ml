@@ -2,26 +2,29 @@
 import pandas as pd
 
 
-def data_loader(path, data_dir, pickle=False, feature_selector=None):
+def data_loader(path, data_dir, pickle=False, feature_selector=[]):
     """
     Loads time series data from indicated directory.
-    Inputs:   path -> string
-              data_dir -> string
-              pickle -> bool
-              feature_selector -> list
-    Outputs:  data -> pd.DataFrame
+    Inputs:   path: string
+              data_dir: string
+              pickle: bool
+              feature_selector: list
+    Outputs:  data: pd.DataFrame
     
     """
     # parse dates to datetime in format YY-MM-DD before loading
     dateparse = lambda x: pd.to_datetime(x, format='%Y-%m-%d', errors='coerce')
     
     if pickle:
-      data = pd.read_pickle(path + data_dir)
+        data = pd.read_pickle(path + data_dir)
     else:
-      data = pd.read_csv(path + data_dir, parse_dates=['date'], 
-                       index_col=['date', 'permno'], date_parser=dateparse, skipinitialspace=True)
-    if feature_selector is not None:
-      data = data.loc[:, feature_selector]
+        data = pd.read_csv(path + data_dir, 
+                         parse_dates=['date'],
+                         index_col=['date', 'permno'], 
+                         date_parser=dateparse, skipinitialspace=True)
+    
+    if len(feature_selector) > 0:
+        data = data.loc[:, feature_selector]
     
     return data
     

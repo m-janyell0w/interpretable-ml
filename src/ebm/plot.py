@@ -16,6 +16,7 @@ def visualize_sample_prediction(y_test, y_pred, data):
     # Picks a random stock, to visualize its real returns 
     # against the predicted returns
     permnos_total = data.index.droplevel(['date'])
+    permnos_total = permnos_total.unique()
     
     sample_permno = random.choice(permnos_total)
 
@@ -33,7 +34,7 @@ def visualize_sample_prediction(y_test, y_pred, data):
     plt.title(f'Stock nr {sample_permno} predicted returns (blue) vs actual returns (red)')
     
 
-def importance_bar_chart(feature_importance_df):
+def importance_bar_chart(feature_importance_df, model_dir='./models/ebm/' , save=False, id='00'):
     
     # sort unsorted df by importance
     feature_importance_df.sort_values(by='importance score', ascending=False, axis=0, inplace=True)
@@ -53,3 +54,6 @@ def importance_bar_chart(feature_importance_df):
     ax.set_title('Average global feature importance')
 
     plt.show()
+    
+    if save:
+        plt.savefig(f'{model_dir}ebm_importances_{id}.png')
