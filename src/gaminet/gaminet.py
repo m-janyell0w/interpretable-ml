@@ -407,14 +407,14 @@ class GAMINet(tf.keras.Model):
             wandb.log({"Train Loss" : batch_train_loss,
                            'Loss test: ' : batch_val_loss})
             
-            if self.verbose & (epoch % 5 == 0):
+            if self.verbose & ((epoch+1) % 5 == 0):
                 print("Main effects training epoch: %d, train loss: %0.5f, val loss: %0.5f" %
                       (epoch + 1, self.err_train_main_effect_training[-1], self.err_val_main_effect_training[-1]))
             
             if ((epoch+1) % 10 == 0):
                 #### SAVE MODEL
                 print("Model is being saved")
-                self.save_model()
+                self.save_model(name="model_maineffects")
             
             if self.err_val_main_effect_training[-1] < best_validation:
                 best_validation = self.err_val_main_effect_training[-1]
@@ -529,7 +529,7 @@ class GAMINet(tf.keras.Model):
             wandb.log({"Train Loss" : batch_train_loss,
                            'Loss test: ' : batch_val_loss})
             
-            if self.verbose & (epoch % 1 == 0):
+            if self.verbose & ((epoch+1) % 5 == 0):
                 print("Interaction training epoch: %d, train loss: %0.5f, val loss: %0.5f" %
                       (epoch + 1, self.err_train_interaction_training[-1], self.err_val_interaction_training[-1]))
             
@@ -593,16 +593,15 @@ class GAMINet(tf.keras.Model):
                 batch_yy = tr_y[offset:(offset + self.batch_size)]
                 batch_sw = tr_sw[offset:(offset + self.batch_size)]
                 self.train_all(tf.cast(batch_xx, tf.float32), tf.cast(batch_yy, tf.float32), tf.cast(batch_sw, tf.float32))
-
-            batch_train_loss
-            batch_val_loss
             
             self.err_train_tuning.append(self.evaluate(tr_x, tr_y, tr_sw,
                                          main_effect_training=False, interaction_training=False))
             self.err_val_tuning.append(self.evaluate(val_x, val_y, sample_weight[self.val_idx],
                                         main_effect_training=False, interaction_training=False))
             
-            # log train and valid loss to wandb for monitoring
+            # get and log train and valid loss to wandb for monitoring
+            batch_train_loss = self.err_train_tuning[-1]
+            batch_val_loss = self.err_val_tuning[-1]
             wandb.log({"Train Loss" : batch_train_loss,
                            'Loss test: ' : batch_val_loss})
             
@@ -642,8 +641,9 @@ class GAMINet(tf.keras.Model):
         n_samples = train_x.shape[0]
         indices = np.arange(n_samples)
         if self.task_type == "Regression":
-            tr_x, val_x, tr_y, val_y, tr_idx, val_idx = train_test_split(train_x, train_y, indices, test_size=self.val_ratio,
-                                          random_state=self.random_state)
+            tr_x, val_x, tr_y, val_y, tr_idx, val_idx = \
+            train_test_split(train_x, train_y, indices, test_size=self.val_ratio,
+                             random_state=self.random_state, shuffle=False)
         elif self.task_type == "Classification":
             tr_x, val_x, tr_y, val_y, tr_idx, val_idx = train_test_split(train_x, train_y, indices, test_size=self.val_ratio,
                                       stratify=train_y, random_state=self.random_state)
@@ -887,7 +887,7 @@ class GAMINet(tf.keras.Model):
             setattr(self, key, item)
         self.optimizer.lr = model_dict["lr_bp"][0]
 
-    def save_model(self, folder="./artifacts/", name="model_maineffects"):
+    def save_model(self, folder="models/gaminet/", name="model_maineffects"):
         
         model_dict = {}
         model_dict["meta_info"] = self.meta_info
@@ -911,7 +911,7 @@ class GAMINet(tf.keras.Model):
         
         if not os.path.exists(folder):
             os.makedirs(folder)
-        save_path = folder + name + ".pickle"
+        save_path = folder + name + ".pkl"
         with open(save_path, 'wb') as handle:
             pickle.dump(model_dict, handle)
             
