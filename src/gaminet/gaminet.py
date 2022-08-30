@@ -537,7 +537,8 @@ class GAMINet(tf.keras.Model):
                 #### SAVE MODEL
                 print("Model is being saved")
                 self.save_model(name="model_interactions")
-            
+                self.save('')
+                
             if self.err_val_interaction_training[-1] < best_validation:
                 best_validation = self.err_val_interaction_training[-1]
                 last_improvement = epoch
@@ -598,6 +599,8 @@ class GAMINet(tf.keras.Model):
                                          main_effect_training=False, interaction_training=False))
             self.err_val_tuning.append(self.evaluate(val_x, val_y, sample_weight[self.val_idx],
                                         main_effect_training=False, interaction_training=False))
+            
+            self.save_model(name="model_finetuning")
             
             # get and log train and valid loss to wandb for monitoring
             batch_train_loss = self.err_train_tuning[-1]
@@ -875,7 +878,7 @@ class GAMINet(tf.keras.Model):
 
         return data_dict_local
     
-    def load(self, folder="./", name="model"):
+    def load(self, folder="models/gaminet/", name="model"):
         
         save_path = folder + name + ".pickle"
         if not os.path.exists(save_path):
@@ -915,7 +918,7 @@ class GAMINet(tf.keras.Model):
         with open(save_path, 'wb') as handle:
             pickle.dump(model_dict, handle)
             
-    def save(self, folder="./artifacts/", name="model"):
+    def save(self, folder="models/gaminet/", name="model"):
 
         self.__call__(np.random.uniform(0, 1, size=(1, len(self.meta_info) - 1)))
 
