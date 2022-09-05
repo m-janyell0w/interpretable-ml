@@ -57,3 +57,54 @@ def importance_bar_chart(feature_importance_df, model_dir='./models/ebm/' , save
     
     if save:
         fig.savefig(f'{model_dir}ebm_importances_{id}.png')
+
+def plot_shape_function(data_dict, feature_name, num_cols, scaler_dict, dataset_name='subsample', run_id='', debug=False):
+    """
+    Plot shape function of one given feature.
+    Params: 
+        :positionals: data_dict, feature_nam, cum_cols, scaler_dict
+        :defaults: dataset_name, run_id, debug
+    """
+    x_vals = data_dict["names"].copy()
+    y_vals = data_dict["scores"].copy()
+
+    # This is important since you do not plot plt.stairs with len(edges) == len(vals) + 1, which will have a drop to zero at the end
+    y_vals = np.r_[y_vals, y_vals[np.newaxis, -1]] 
+
+    # This is the code interpretml also uses: https://github.com/interpretml/interpret/blob/2327384678bd365b2c22e014f8591e6ea656263a/python/interpret-core/interpret/visual/plot.py#L115
+
+    # main_line = go.Scatter(
+    #     x=x_vals,
+    #     y=y_vals,
+    #     name="Main",
+    #     mode="lines",
+    #     line=dict(color="rgb(31, 119, 180)", shape="hv"),
+    #     fillcolor="rgba(68, 68, 68, 0.15)",
+    #     fill="none",
+    # )
+    #
+    # main_fig = go.Figure(data=[main_line])
+    # main_fig.show()
+    # main_fig.write_image(f'plots/{model_name}_{dataset_name}_shape_{feature_name}_{num_epochs}epochs.pdf')
+    
+    
+    # This is my custom code used for plotting
+    x = np.array(x_vals)
+    if debug:
+        print("Num cols:", num_cols)
+    if feature_name in num_cols:
+        if debug:
+            print("Feature to scale back:", feature_name)
+        #x = scaler_dict[feature_name].inverse_transform(x.reshape(-1, 1)).squeeze()
+    else:
+        if debug:
+            print("Feature not to scale back:", feature_name)
+
+    plt.step(x, y_vals, where="post", color='black')
+    # plt.fill_between(x, lower_bounds, mean, color='gray')
+    # plt.fill_between(x, mean, upper_bounds, color='gray')
+    plt.xlabel(f'Feature value')
+    plt.ylabel('Feature effect on model output')
+    plt.title(f'Feature:{feature_name}')
+    plt.savefig(f'figures/ebm/{run_id}_{dataset_name}_shape_{feature_name}_.png')
+    plt.show()
