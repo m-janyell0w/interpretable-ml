@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import random
 
+
+
 def visualize_sample_prediction(y_test, y_pred, data):
     """
     Plots a random permno's predicted return vs actual returns
@@ -58,11 +60,11 @@ def importance_bar_chart(feature_importance_df, model_dir='./models/ebm/' , save
     if save:
         fig.savefig(f'{model_dir}ebm_importances_{id}.png')
 
-def plot_shape_function(data_dict, feature_name, num_cols, scaler_dict, dataset_name='subsample', run_id='', debug=False):
+def plot_shape_function(data_dict, feature_name, num_cols='', scaler_dict={}, dataset_name='subsample', run_id='', debug=False):
     """
     Plot shape function of one given feature.
     Params: 
-        :positionals: data_dict, feature_nam, cum_cols, scaler_dict
+        :positionals: data_dict, feature_name, cum_cols, scaler_dict
         :defaults: dataset_name, run_id, debug
     """
     x_vals = data_dict["names"].copy()
@@ -100,7 +102,7 @@ def plot_shape_function(data_dict, feature_name, num_cols, scaler_dict, dataset_
         if debug:
             print("Feature not to scale back:", feature_name)
 
-    plt.step(x, y_vals, where="post", color='black')
+    plt.step(x, y_vals, where="post") #, color='black')
     # plt.fill_between(x, lower_bounds, mean, color='gray')
     # plt.fill_between(x, mean, upper_bounds, color='gray')
     plt.xlabel(f'Feature value')
