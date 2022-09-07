@@ -90,7 +90,7 @@ class EbmPipeline():
         
         pipeline_artifacts = {
             "execution_time" : execution_time,
-            "r-squared" : [is_score, oos_score], 
+            #"r-squared" : [is_score, oos_score], 
             "rmse_test" : rmse_test, 
             "mse_test" : mse_test, 
             "mae_test" : mae_test,
@@ -222,7 +222,7 @@ def evaluate_model(model, X, y, set_type="train"):
 
     return metrics
 
-def save_pickled_object(object, model_dir, object_dir)
+def save_pickled_object(object, model_dir, object_dir):
     """
     Saves pickable object (e.g. list or dict) as pickle to
     the indicated directory.
