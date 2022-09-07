@@ -221,3 +221,35 @@ def evaluate_model(model, X, y, set_type="train"):
     }
 
     return metrics
+
+def save_pickled_object(object, model_dir, object_dir)
+    """
+    Saves pickable object (e.g. list or dict) as pickle to
+    the indicated directory.
+    Params: object (pickable), model_dir (str), object_dir (str)
+    """
+    with open(model_dir+object_dir, 'wb') as f:
+        pickle.dump(object, f)
+
+def load_pickled_object(obj_dir):
+    """
+    Loads indicated pickled object from file system.
+    Returns: object
+    """
+    with open(obj_dir, 'rb') as f:
+        object = pickle.load(f)
+    return object
+
+def save_importance_data(ebm_global, model_dir, obj_dir):
+    """
+    Saves importance data from ebm_global object to local
+    file system.
+    """
+    # prepare importance data
+    importances_dict = ebm_global.data()
+    feature_importance_df = pd.DataFrame(importances_dict)
+    feature_importance_df.rename(columns={"names": "feature", "scores": "importance score"}, inplace=True)
+
+    # save as pkl to file system
+    with open(model_dir+obj_dir, 'wb') as f:
+        pickle.dump(feature_importance_df, f)
