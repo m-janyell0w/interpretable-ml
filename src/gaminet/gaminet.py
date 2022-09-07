@@ -385,7 +385,7 @@ class GAMINet(tf.keras.Model):
         tr_sw = sample_weight[self.tr_idx]
         for epoch in range(self.main_effect_epochs):
             shuffle_index = np.arange(tr_x.shape[0])
-            np.random.shuffle(shuffle_index)
+            np.random.shuffle(shuffle_index) # could shuffling be bad for performance?
             tr_x = tr_x[shuffle_index]
             tr_y = tr_y[shuffle_index]
             tr_sw = tr_sw[shuffle_index]
@@ -414,7 +414,7 @@ class GAMINet(tf.keras.Model):
             if ((epoch+1) % 10 == 0):
                 #### SAVE MODEL
                 print("Model is being saved")
-                self.save_model(name="model_maineffects")
+                self.save(name="model_maineffects")
             
             if self.err_val_main_effect_training[-1] < best_validation:
                 best_validation = self.err_val_main_effect_training[-1]
@@ -536,8 +536,7 @@ class GAMINet(tf.keras.Model):
             if ((epoch+1) % 10 == 0):
                 #### SAVE MODEL
                 print("Model is being saved")
-                self.save_model(name="model_interactions")
-                self.save('')
+                self.save(name="model_interactions")
                 
             if self.err_val_interaction_training[-1] < best_validation:
                 best_validation = self.err_val_interaction_training[-1]
@@ -600,7 +599,9 @@ class GAMINet(tf.keras.Model):
             self.err_val_tuning.append(self.evaluate(val_x, val_y, sample_weight[self.val_idx],
                                         main_effect_training=False, interaction_training=False))
             
-            self.save_model(name="model_finetuning")
+            if ((epoch+1) % 10 == 0):
+                print('Model is being saved.')
+                self.save(name="model_finetuning")
             
             # get and log train and valid loss to wandb for monitoring
             batch_train_loss = self.err_train_tuning[-1]
@@ -646,7 +647,7 @@ class GAMINet(tf.keras.Model):
         if self.task_type == "Regression":
             tr_x, val_x, tr_y, val_y, tr_idx, val_idx = \
             train_test_split(train_x, train_y, indices, test_size=self.val_ratio,
-                             random_state=self.random_state, shuffle=False)
+                             random_state=self.random_state, shuffle=True)
         elif self.task_type == "Classification":
             tr_x, val_x, tr_y, val_y, tr_idx, val_idx = train_test_split(train_x, train_y, indices, test_size=self.val_ratio,
                                       stratify=train_y, random_state=self.random_state)
@@ -708,7 +709,7 @@ class GAMINet(tf.keras.Model):
         if self.verbose:
             print("#" * 20 + "GAMI-Net training finished." + "#" * 20)
 
-    def summary_logs(self, save_dict=False, folder="./", name="summary_logs"):
+    def summary_logs(self, save_dict=False, folder="models/gaminet", name="summary_logs"):
 
         data_dict_log = {}
         data_dict_log.update({"err_train_main_effect_training": self.err_train_main_effect_training,
@@ -731,7 +732,8 @@ class GAMINet(tf.keras.Model):
 
         return data_dict_log
 
-    def global_explain(self, main_grid_size=100, interact_grid_size=100, save_dict=False, folder="./", name="global_explain"):
+    def global_explain(self, main_grid_size=100, interact_grid_size=100, save_dict=False, 
+                       folder="models/gaminet/", name="global_explain"):
 
         # By default, we use the same main_grid_size and interact_grid_size as that of the zero mean constraint
         # Alternatively, we can also specify it manually, e.g., when we want to have the same grid size as EBM (256).        
@@ -985,10 +987,10 @@ class GAMINet(tf.keras.Model):
         model_dict["main_effect_val_loss"] = self.main_effect_val_loss
         model_dict["interaction_val_loss"] = self.interaction_val_loss
 
-        model_dict["active_indice"] = self.active_indice
-        model_dict["effect_names"] = self.effect_names
-        model_dict["active_main_effect_index"] = self.active_main_effect_index
-        model_dict["active_interaction_index"] = self.active_interaction_index
+        # model_dict["active_indice"] = self.active_indice
+        # model_dict["effect_names"] = self.effect_names
+        # model_dict["active_main_effect_index"] = self.active_main_effect_index
+        # model_dict["active_interaction_index"] = self.active_interaction_index
 
         model_dict["tr_idx"] = self.tr_idx
         model_dict["val_idx"] = self.val_idx

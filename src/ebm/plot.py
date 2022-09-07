@@ -60,7 +60,7 @@ def importance_bar_chart(feature_importance_df, model_dir='./models/ebm/' , save
     if save:
         fig.savefig(f'{model_dir}ebm_importances_{id}.png')
 
-def plot_shape_function(data_dict, feature_name, dataset_name='sub', run_id='', debug=False):
+def plot_shape_function(data_dict, feature_name, dataset_name='sub', run_id='', debug=False, save=False):
     """
     Plot shape function of one given feature.
     Params: 
@@ -83,12 +83,20 @@ def plot_shape_function(data_dict, feature_name, dataset_name='sub', run_id='', 
     # else:
     #     if debug:
     #         print("Feature not to scale back:", feature_name)
-
+    
+    plt.xlim(left=-3, right=3) # temporary fix, better: rescale X
     plt.step(x, y_vals, where="post") #, color='black')
     # plt.fill_between(x, lower_bounds, mean, color='gray')
     # plt.fill_between(x, mean, upper_bounds, color='gray')
     plt.xlabel(f'Feature value')
     plt.ylabel('Feature effect on model output')
     plt.title(f'Feature:{feature_name}')
-    plt.savefig(f'figures/ebm/{run_id}_{dataset_name}_shape_{feature_name}_.png')
+    if save:
+        plt.savefig(f'figures/ebm/{run_id}_{dataset_name}_shape_{feature_name}_.png')
     plt.show()
+
+def make_plot_interaction(shape_data_left, shape_data_right,
+                          scores, x_name, y_name, plot_name='interaction_plot'):
+    # To-Do: implement heatmap with x-y and score as hue!
+    # plots
+    return None
