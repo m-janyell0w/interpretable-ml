@@ -36,29 +36,39 @@ def visualize_sample_prediction(y_test, y_pred, data):
     plt.title(f'Stock nr {sample_permno} predicted returns (blue) vs actual returns (red)')
     
 
-def importance_bar_chart(feature_importance_df, model_dir='./models/ebm/' , save=False, id='00'):
-    
+def importance_bar_chart(feature_importance_df, effect_names, model_dir='./models/results/', model_name='EBM', save=False, id='00'):
+
     # sort unsorted df by importance
     feature_importance_df.sort_values(by='importance score', ascending=False, axis=0, inplace=True)
-    
-    plt.rcdefaults()
-    fig, ax = plt.subplots()
+    n_features = feature_importance_df.shape[0]
+    figsize=(6, 0.25*n_features)
+
+    #plt.rcdefaults()
+    fig, ax = plt.subplots(figsize=figsize)
+    #fig.text(0.001, 0.5, 'Variable', ha='center', va='center', rotation='vertical', fontsize='large')
+    plt.subplots_adjust(hspace=0.2, wspace=0.2)
 
     # ylabels
-    features = feature_importance_df.feature
-    y_pos = np.arange(len(features))
+    #features = effect_names
+    features_latex = []
+    for name in effect_names:
+        name_latex = fr'${name}$'
+        features_latex.append(name_latex)
+
+    y_pos = np.arange(len(effect_names))
     importance = feature_importance_df['importance score']
-    
+
+
     ax.barh(y_pos, importance, align='center')
-    ax.set_yticks(y_pos, labels=features)
+    ax.set_yticks(y_pos, labels=features_latex)
     ax.invert_yaxis()  # labels read top-to-bottom
     ax.set_xlabel('Importance')
-    ax.set_title('Average global feature importance')
+    #ax.set_title('Average global feature importance')
 
     plt.show()
     
     if save:
-        fig.savefig(f'{model_dir}ebm_importances_{id}.png')
+        fig.savefig(f'{model_dir}{model_name}_feature_importances_{id}.png', bbox_inches='tight', dpi=200)
 
 def plot_shape_function(data_dict, feature_name, dataset_name='sub', run_id='', debug=False, save=False):
     """
