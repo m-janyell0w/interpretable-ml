@@ -36,10 +36,16 @@ def visualize_sample_prediction(y_test, y_pred, data):
     plt.title(f'Stock nr {sample_permno} predicted returns (blue) vs actual returns (red)')
     
 
-def importance_bar_chart(feature_importance_df, effect_names, model_dir='./models/results/', model_name='EBM', save=False, id='00'):
+def importance_bar_chart(feature_importance_df, effect_names, model_dir='./models/results/', model_name='EBM', save=False, id='00', ir=False):
 
     # sort unsorted df by importance
-    feature_importance_df.sort_values(by='importance score', ascending=False, axis=0, inplace=True)
+    if not ir:
+        feature_importance_df.sort_values(by='importance score', ascending=False, axis=0, inplace=True)
+        importance = feature_importance_df['importance score']
+    else:
+        feature_importance_df.sort_values(by='importance ratio', ascending=False, axis=0, inplace=True)
+        importance = feature_importance_df['importance ratio']
+    
     n_features = feature_importance_df.shape[0]
     figsize=(6, 0.25*n_features)
 
@@ -56,15 +62,15 @@ def importance_bar_chart(feature_importance_df, effect_names, model_dir='./model
         features_latex.append(name_latex)
 
     y_pos = np.arange(len(effect_names))
-    importance = feature_importance_df['importance score']
-
-
+    
     ax.barh(y_pos, importance, align='center')
     ax.set_yticks(y_pos, labels=features_latex)
     ax.invert_yaxis()  # labels read top-to-bottom
-    ax.set_xlabel('Importance')
+    if not ir:
+        ax.set_xlabel('Importance')
+    else:
+        ax.set_xlabel('Importance ratio')
     #ax.set_title('Average global feature importance')
-
     plt.show()
     
     if save:
